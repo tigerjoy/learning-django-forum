@@ -2,11 +2,23 @@ from django.shortcuts import get_object_or_404, render
 from django.http import Http404
 from .models import Board
 
-# Create your views here.
 def home(request):
     boards = Board.objects.all()
     
     return render(request, 'home.html', context={"boards": boards})
+
+# Rendering HTML without using render()
+
+# def home(request):
+#     boards = Board.objects.all()
+#     board_names = list()
+
+#     for board in boards:
+#         board_names.append(board.name)
+    
+#     response_html = "<br>".join(board_names)
+
+#     return HttpResponse(response_html)
 
 def board_topics(request, pk):
     board = get_object_or_404(Board, pk=pk)
@@ -27,15 +39,6 @@ def board_topics(request, pk):
 
 #     return render(request, 'topics.html', context)
 
-# Rendering HTML without using render()
-
-# def home(request):
-#     boards = Board.objects.all()
-#     board_names = list()
-
-#     for board in boards:
-#         board_names.append(board.name)
-    
-#     response_html = "<br>".join(board_names)
-
-#     return HttpResponse(response_html)
+def new_topic(request, pk):
+    board = get_object_or_404(Board, pk=pk)
+    return render(request, 'new_topic.html', {'board': board})
