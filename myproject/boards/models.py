@@ -16,12 +16,18 @@ class Topic(models.Model):
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name="topics")
     starter = models.ForeignKey(User, on_delete=models.SET("Deleted User"), related_name="topics")
 
+    def __str__(self):
+        return self.subject
+
 class Post(models.Model):
-    message = models.TextField(max_length=4000)
+    message = models.TextField(max_length=40000)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET("Deleted User"), related_name='posts')
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='+')
+    topic = models.ForeignKey(Topic, related_name="posts", on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.message
 
 
