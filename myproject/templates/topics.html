@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
-<!-- {% block.super %} returns the default value of a block -->
+<!-- {# block.super #} returns the default value of a block -->
 
 {% block title %}  
-    {{ block.super }}
+    {{ board.name }} - {{ block.super }}
 {% endblock %}
 
 {% block breadcrumb %}
