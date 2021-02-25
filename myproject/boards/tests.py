@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.urls import resolve
 from django.contrib.auth.models import User
 
-
+from .forms import NewTopicForm
 from .views import board_topics, home, new_topic
 from .models import Board, Topic, Post
 
@@ -162,17 +162,19 @@ class NewTopicsTest(TestCase):
         self.assertTrue(Topic.objects.exists())
         self.assertTrue(Post.objects.exists())
 
-    # Checks to see how the application behaves when posting
-    # nothing to the view ex. {} empty dictionary
+    # Checks to see if the form displayed after submittion
+    # of invalid valid data displays a form containing errors
     def test_new_topic_invalid_post_data(self):
         '''
         Invalid post data should not redirect
         The expected behavior is to show the form again with validation errors
         '''
         url = reverse("new_topic", kwargs={"pk": 1})
-        # Simulating posting of an empty form
+        # Simulating submission of an empty form
         response = self.client.post(url, {})
+        form = response.context.get("form")
         self.assertEquals(response.status_code, 200)
+        self.assertTrue(form.errors)
 
     # Checks to see the behavior of the application when
     # the user submits an empty form
@@ -190,3 +192,11 @@ class NewTopicsTest(TestCase):
         self.assertEquals(response.status_code, 200)
         self.assertFalse(Topic.objects.exists())
         self.assertFalse(Post.objects.exists())
+    
+    # Checks to see if the new_topic view contains a form
+    def test_contains_form(self):
+        url = reverse("new_topic", kwargs={"pk": 1})
+        response = self.client.get(url)
+        form = response.context.get("form")
+        self.assertIsInstance(form, NewTopicForm)
+    
