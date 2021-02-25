@@ -67,6 +67,27 @@ class SuccessfulSignUpTests(TestCase):
         user = response.context.get('user')
         self.assertTrue(user.is_authenticated)
 
+class InvalidSignUpTests(TestCase):
+    def setUp(self):
+        url = reverse("signup")
+        # Submit an empty dictionary
+        self.response = self.client.post(url, {})
 
+    # Checks if the sign up page upon submitting invalid data
+    # returns to the same page
+    def test_signup_status_code(self):
+        '''
+        An invalid form submission should return to the same page
+        '''
+        self.assertEqual(self.response.status_code, 200)
 
+    # Checks if the form after submission contains errors
+    def test_form_errors(self):
+        form = self.response.context.get("form")
+        self.assertTrue(form.errors)
+    
+    # Checks if an user has been created after submission of 
+    # erroneous form
+    def test_dont_create_user(self):
+        self.assertFalse(User.objects.exists())
 
