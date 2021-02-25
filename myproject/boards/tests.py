@@ -3,9 +3,11 @@ from django.test import TestCase
 # from django.core.urlresolvers import reverse
 from django.urls import reverse
 from django.urls import resolve
-from .views import board_topics, home, new_topic
+from django.contrib.auth.models import User
 
-from .models import Board
+
+from .views import board_topics, home, new_topic
+from .models import Board, Topic, Post
 
 # NOTE
 # 1. reverse(view_name) returns an url corresponding to a view
@@ -105,7 +107,11 @@ class NewTopicsTest(TestCase):
     # NOTE: production and testing database
     # are different
     def setUp(self):
+        # For NewTopicsTest we need a board to create topics within
+        # and an user who is posting
         Board.objects.create(name="Django", description="Django board.")
+        User.objects.create_user(
+            username="john", email="john@doe.com", password="123")
 
     # Check if the new_topic view can successfully
     # return the data corresponding to pk=1
@@ -135,3 +141,52 @@ class NewTopicsTest(TestCase):
         response = self.client.get(new_topic_url)
         board_topics_url = reverse('board_topics', kwargs={"pk": 1})
         self.assertContains(response, 'href="{0}"'.format(board_topics_url))
+
+    # Checks to see if the forms are generated with csrf token
+    # although this check is performed by Django 3.0 by default
+    def test_csrf(self):
+        new_topic_url = reverse('new_topic', kwargs={"pk": 1})
+        response = self.client.get(new_topic_url)
+        self.assertContains(response, "csrfmiddlewaretoken")
+
+    # Checks to see if the form accepts valid post data
+    # by posting a data checking if it has been inserted
+    # in the database under Topic and Post tables
+    def test_new_topic_valid_post_data(self):
+        url = reverse('new_topic', kwargs={"pk": 1})
+        data = {
+            "subject": "title",
+            "message": "Lorem ipsum dolor sit amet"
+        }
+        response = self.client.post(url, data)
+        self.assertTrue(Topic.objects.exists())
+        self.assertTrue(Post.objects.exists())
+
+    # Checks to see how the application behaves when posting
+    # nothing to the view ex. {} empty dictionary
+    def test_new_topic_invalid_post_data(self):
+        '''
+        Invalid post data should not redirect
+        The expected behavior is to show the form again with validation errors
+        '''
+        url = reverse("new_topic", kwargs={"pk": 1})
+        # Simulating posting of an empty form
+        response = self.client.post(url, {})
+        self.assertEquals(response.status_code, 200)
+
+    # Checks to see the behavior of the application when
+    # the user submits an empty form
+    def test_new_topic_invalid_post_data_empty_fields(self):
+        '''
+        Invalid post data should not redirect
+        The expected behavior is to show the form again with validation errors
+        '''
+        url = reverse("new_topic", kwargs={"pk": 1})
+        data = {
+            "subject": "",
+            "message": ""
+        }
+        response = self.client.post(url, data)
+        self.assertEquals(response.status_code, 200)
+        self.assertTrue(Topic.objects.exists())
+        self.assertTrue(Post.objects.exists())
