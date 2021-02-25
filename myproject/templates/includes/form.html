@@ -1,0 +1,43 @@
+{% load widget_tweaks %}
+
+{% for field in form %}
+    <div class="form-group">
+        {{ field.label_tag }}
+
+        {% comment %} If the form has been submitted before {% endcomment %}
+        {% if form.is_bound %}
+            {% comment %} If the form has error {% endcomment %}
+            {% if field.errors %}
+                {% comment %} 
+                Invalidate the form field with class "is-invalid" 
+                {% endcomment %}
+                {% render_field field class="form-control is-invalid" %}
+                {% comment %} 
+                for each error in the field display them as invalid-feedback's
+                {% endcomment %}
+                {% for error in field.errors %}
+                    <div class="invalid-feedback">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            {% else %}
+                {% comment %} Render the field and mark it valid {% endcomment %}
+                {% render_field field class="form-control is-valid" %}
+            {% endif %}
+        {% comment %} If the form has been opened for the first time {% endcomment %}
+        {% else %}
+            {% comment %} Display the usual form without any marking {% endcomment %}
+            {% render_field field class="form-control" %}
+        {% endif %}
+
+        {% comment %} 
+        Display the help text if the form is invalid, valid, or opened for the first 
+        time
+        {% endcomment %}
+        {% if field.help_text %}
+            <small class="form-text text-muted">
+                {{ field.help_text }}
+            </small>
+        {% endif %}
+    </div>
+{% endfor %}
