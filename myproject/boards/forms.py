@@ -3,7 +3,16 @@ from .models import Topic
 
 
 class NewTopicForm(forms.ModelForm):
-    message = forms.CharField(widget=forms.Textarea(), max_length=40000)
+    message = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                "rows": 5,
+                "placeholder":"What's on your mind?" 
+            }
+        ), 
+        max_length=40000,
+        help_text="The max length of the text is 40000"
+    )
 
     class Meta:
         model = Topic
