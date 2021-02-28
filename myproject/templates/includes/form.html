@@ -1,4 +1,4 @@
-{% load widget_tweaks %}
+{% load form_tags widget_tweaks %}
 
 {% if form.non_field_errors %}
     <div class="alert alert-danger" role="alert">
@@ -14,33 +14,30 @@
 {% for field in form %}
     <div class="form-group">
         {{ field.label_tag }}
+        {% comment %} 
+        Pass the field to the input_class templatetag and let it
+        decide what class to add when the field is 
+        
+        1) not bound (form is opened for the first time)
+            CSS -> "form-control"
+        2) bound and is valid (form has been submitted before)
+            CSS -> "form-control is-valid"
+        3) bound and is invalid (form has been submitted before)
+            CSS -> "form-control is-invalid"
 
-        {% comment %} If the form has been submitted before {% endcomment %}
-        {% if form.is_bound %}
-            {% comment %} If the form has error {% endcomment %}
-            {% if field.errors %}
-                {% comment %} 
-                Invalidate the form field with class "is-invalid" 
-                {% endcomment %}
-                {% render_field field class="form-control is-invalid" %}
-                {% comment %} 
-                for each error in the field display them as invalid-feedback's
-                {% endcomment %}
-                {% for error in field.errors %}
-                    <div class="invalid-feedback">
-                        {{ error }}
-                    </div>
-                {% endfor %}
-            {% else %}
-                {% comment %} Render the field and mark it valid {% endcomment %}
-                {% render_field field class="form-control is-valid" %}
-            {% endif %}
-        {% comment %} If the form has been opened for the first time {% endcomment %}
-        {% else %}
-            {% comment %} Display the usual form without any marking {% endcomment %}
-            {% render_field field class="form-control" %}
-        {% endif %}
-
+        field|input_class calls input_class(field) of the form_tags
+        template tags.
+        
+        {% endcomment %}
+        {% render_field field class=field|input_class %}
+        {% comment %} 
+        for each error in the field display them as invalid-feedback's
+        {% endcomment %}
+        {% for error in field.errors %}
+            <div class="invalid-feedback">
+                {{ error }}
+            </div>
+        {% endfor %}
         {% comment %} 
         Display the help text if the form is invalid, valid, or opened for the first 
         time
